@@ -10,16 +10,7 @@ h1, h2 { color: #333; }
 label { display: block; margin-bottom: 10px; font-weight: bold; }
 input { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
 
-.turno {
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 8px;
-  transition: transform 0.2s, box-shadow 0.2s, background 0.5s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
+.turno { padding: 12px; margin: 10px 0; border-radius: 8px; transition: transform 0.2s, box-shadow 0.2s, background 0.5s; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
 .turno.disponible { background-color: #e6f9e6; border: 2px solid #4CAF50; }
 .turno.disponible:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 .turno.bajo { background-color: #fff8e1; border: 2px solid #FFA500; }
@@ -28,17 +19,7 @@ input { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
 .turno div { flex: 1 1 60%; min-width: 150px; }
 .cupos { font-weight: bold; transition: color 0.5s, transform 0.3s; }
 
-button {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s, transform 0.2s;
-  flex: 1 1 35%;
-  min-width: 120px;
-  margin-top: 8px;
-}
+button { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s, transform 0.2s; flex: 1 1 35%; min-width: 120px; margin-top: 8px; }
 button:hover { transform: translateY(-1px); }
 button:disabled { cursor: not-allowed; opacity: 0.5; }
 button.apuntarse { background-color: #4CAF50; color: white; }
@@ -55,13 +36,13 @@ button.apuntarse { background-color: #4CAF50; color: white; }
 
 <h2>Datos de contacto</h2>
 <label>Nombre: <input type="text" id="nombre"></label>
-<label>Teléfono: <input type="text" id="telefono"></label>
+<label>Teléfono: <input type="text" id="telefono" placeholder="+34 600-123-456"></label>
 
 <h2>Turnos disponibles</h2>
 <div id="turnos"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxEYiQDFUxJzMz2anmZuYI41R0l_vyEnQobN6SQuyudTwN0b5V99ImxsL-LL5mqH0Fl-g/exec";
+const API_URL = "PEGAR_AQUI_LA_URL_DEL_SCRIPT"; // Reemplaza con tu URL de Apps Script
 let refrescoInterval;
 let turnosPrevios = {};
 
@@ -74,19 +55,16 @@ async function cargarTurnos() {
     const key = t.dia + t.horario;
     let div = document.getElementById(key);
 
-    // Crear div si no existe
-    if (!div) {
-      div = document.createElement("div");
-      div.id = key;
-      cont.appendChild(div);
+    if (!div) { 
+      div = document.createElement("div"); 
+      div.id = key; 
+      cont.appendChild(div); 
     }
 
-    // Determinar clase según estado de cupos
     if (t.cupos == 0) div.className = "turno ocupado";
     else if (t.cupos <= 3) div.className = "turno bajo";
     else div.className = "turno disponible";
 
-    // Comparar cupos previos para animación
     let prev = turnosPrevios[key] || 0;
     let animClass = "";
     if (t.cupos > prev) animClass = "aumento";
@@ -100,7 +78,6 @@ async function cargarTurnos() {
       <button class="apuntarse" onclick="apuntarse('${t.dia}','${t.horario}')" ${t.cupos==0?"disabled":""}>Apuntarse</button>
     `;
 
-    // Animación temporal de cambio de color
     if (animClass) {
       const span = div.querySelector(".cupos");
       span.style.color = animClass === "aumento" ? "#4CAF50" : "#FF5722";
@@ -115,9 +92,25 @@ async function cargarTurnos() {
 async function apuntarse(dia, horario) {
   const nombre = document.getElementById("nombre").value.trim();
   const telefono = document.getElementById("telefono").value.trim();
-  if (!nombre || !telefono) { alert("Rellena nombre y teléfono"); return; }
 
-  // Pausar refresco temporalmente
+  if (!nombre || !telefono) { 
+    alert("Rellena nombre y teléfono"); 
+    return; 
+  }
+
+  // Validación flexible del teléfono
+  if (!/^\+?[0-9\s\-()]+$/.test(telefono)) {
+    alert("El teléfono solo puede contener números, espacios, guiones, paréntesis o un + al inicio");
+    return;
+  }
+
+  // Validar mínimo 8 dígitos reales
+  const digitos = telefono.replace(/\D/g,''); // quita todo excepto números
+  if (digitos.length < 8) {
+    alert("El teléfono debe contener al menos 8 dígitos");
+    return;
+  }
+
   clearInterval(refrescoInterval);
 
   const url = `${API_URL}?accion=reserva&dia=${encodeURIComponent(dia)}&horario=${encodeURIComponent(horario)}&nombre=${encodeURIComponent(nombre)}&telefono=${encodeURIComponent(telefono)}`;
@@ -128,29 +121,24 @@ async function apuntarse(dia, horario) {
     if (data.status==="ok") {
       alert(`✅ Te has apuntado correctamente a ${dia} de ${horario}, muchas gracias por colaborar.`);
       location.reload();
-    }
-    else if (data.status==="sin_cupos") { 
+    } else if (data.status==="sin_cupos") { 
       alert("❌ Ya no quedan cupos"); 
       cargarTurnos(); 
-    }
-    else { 
+    } else { 
       alert("⚠️ Error: "+data.status); 
     }
   } catch(err) { 
     alert("❌ Error al conectar con el servidor"); 
     console.error(err); 
   } finally {
-    // Reiniciar refresco después de 5 segundos
     setTimeout(() => {
       refrescoInterval = setInterval(cargarTurnos, 30000);
     }, 5000);
   }
 }
 
-// Cargar turnos inicialmente
+// Inicializar
 cargarTurnos();
-
-// Refrescar automáticamente cada 30 segundos
 refrescoInterval = setInterval(cargarTurnos, 30000);
 </script>
 </body>
