@@ -32,18 +32,19 @@ button.apuntarse { background-color: #4CAF50; color: white; }
 </style>
 </head>
 <body>
-<h1>Reserva de turnos</h1>
+<h1>Colaboración de turnos</h1>
+<h1>Fiestas Buztintxuri 2025</h1>  
 
 <h2>Datos de contacto</h2>
 <label>Nombre: <input type="text" id="nombre"></label>
 <label>Teléfono: <input type="text" id="telefono" placeholder="+34 600-123-456"></label>
 
 <h2>Turnos disponibles</h2>
-  <h3>(Puede tardar en cargar los turnos, tenga paciencia)</h3>
+  <h3> (Puede tardar un poco en cargar los turnos)</h3>
 <div id="turnos"></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwZvQGH95Z7UNMLjzoRSi4Jqc5YkKsjfbPHswZ7W7M2AbTkugNTaNxzHcKmZ-irzYZQZA/exec"; // Reemplaza con tu URL de Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycbxEYiQDFUxJzMz2anmZuYI41R0l_vyEnQobN6SQuyudTwN0b5V99ImxsL-LL5mqH0Fl-g/exec"; // Reemplaza con tu URL de Apps Script
 let refrescoInterval;
 let turnosPrevios = {};
 
@@ -106,7 +107,7 @@ async function apuntarse(dia, horario) {
   }
 
   // Validar mínimo 8 dígitos reales
-  const digitos = telefono.replace(/\D/g,''); 
+  const digitos = telefono.replace(/\D/g,''); // quita todo excepto números
   if (digitos.length < 8) {
     alert("El teléfono debe contener al menos 8 dígitos");
     return;
@@ -125,8 +126,6 @@ async function apuntarse(dia, horario) {
     } else if (data.status==="sin_cupos") { 
       alert("❌ Ya no quedan cupos"); 
       cargarTurnos(); 
-    } else if (data.status==="duplicado") {
-      alert(data.mensaje);
     } else { 
       alert("⚠️ Error: "+data.status); 
     }
@@ -146,4 +145,5 @@ refrescoInterval = setInterval(cargarTurnos, 30000);
 </script>
 </body>
 </html>
+
 
